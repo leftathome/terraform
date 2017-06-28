@@ -60,8 +60,15 @@ func (p *Plan) contextOpts(base *ContextOpts) (*ContextOpts, error) {
 
 	opts.Diff = p.Diff
 	opts.Module = p.Module
-	opts.State = p.State
 	opts.Targets = p.Targets
+
+	// We are not using the plan state, because we want the state to match the
+	// serial and lineage expected by the storage layer.
+	// The plan state however should have been persisted already, so these
+	// should still be equivalent.
+	if !opts.State.Equal(p.State) {
+		return nil, errors.New("plan state and ContextOpts state are not equal")
+	}
 
 	opts.ProviderSHA256s = p.ProviderSHA256s
 
